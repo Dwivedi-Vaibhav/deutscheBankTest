@@ -10,6 +10,7 @@ import com.sun.tools.sjavac.Log;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Slf4j
@@ -31,6 +32,7 @@ public class AccountsService {
     return this.accountsRepository.getAccount(accountId);
   }
 
+  @Transactional
   public static synchronized Boolean fundTransfer(FundTransfer fundTransfer) {
 	try {
 		Account sender = this.accountsRepository.getAccount(fundTransfer.getFromAccount());
@@ -46,10 +48,10 @@ public class AccountsService {
 		}
 	}catch(InterruptedException ex) {
 		log.error(String.format("Exception occured while doing transaction between accounts %s and %s", sender.getAccountId(),reciever.getAccountId()));
-		return false;
+		throw new RuntimeException("Exception occured while doing transaction");
 	}catch(Exception ex) {
 		log.error("Something went wrong");
-		return false;
+		throw new RuntimeException("Exception occured while doing transaction");
 	}
 	return false;
   }
